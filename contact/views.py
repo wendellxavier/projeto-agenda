@@ -1,4 +1,18 @@
-from django.shortcuts import render
+from django.http import Http404
+from django.shortcuts import render, get_object_or_404
+from .models import Contact
 
 def index(request):
-    return render(request, 'contact/index.html')
+    contacts = Contact.objects.filter(show=True).order_by('-id')[0:10]
+    
+    return render(request, 'contact/index.html', {'contacts': contacts})
+
+
+
+def contact(request, contact_id):
+    single_contact = get_object_or_404(Contact, pk=contact_id, show=True)
+    
+    return render(request, 'contact/contact.html', {'contact': single_contact})
+
+
+
