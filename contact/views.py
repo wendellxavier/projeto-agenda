@@ -36,3 +36,8 @@ def search(request):
         
     return render(request, 'contact/index.html', {'page_obj': page_obj, 'site_title': 'Contatos -', 'search_value': search_value})
 
+
+
+def create(request):
+    
+    return render(request, 'contact/create.html', {})
