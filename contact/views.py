@@ -2,6 +2,7 @@ from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Contact
 from django.core.paginator import Paginator
+from .forms import ContactForm
 
 def index(request):
     contacts = Contact.objects.filter(show=True).order_by('-id')
