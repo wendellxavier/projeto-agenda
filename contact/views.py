@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Contact
 from django.core.paginator import Paginator
 from .forms import ContactForm
-
+from django.urls import reverse
 def index(request):
     contacts = Contact.objects.filter(show=True).order_by('-id')
     
@@ -40,13 +40,35 @@ def search(request):
 
 
 def create(request):
+    from_action = reverse('contact:create')
     if request.method == 'POST':
-        context = { 'form': ContactForm(request.POST)}
+        form = ContactForm(request.POST)
+        context = {'form': form, 'from_action': from_action}
+        
+        if form.is_valid():
+            contact = form.save()
+            return redirect('contact:update', contact_id=contact.pk)
         
         return render(request, 'contact/create.html', context)   
     
-    context = {'form': ContactForm()}
+    context = {'form': ContactForm(), 'from_action': from_action}
     
     return render(request, 'contact/create.html', context)
    
+def update(request, contact_id):
+    contact = get_object_or_404(Contact, pk=contact_id, show=True)
+    from_action = reverse('contact:update', args=(contact_id,))
     
+    if request.method == 'POST':
+        form = ContactForm(request.POST, instance=contact)
+        context = {'form': form, 'from_action': from_action}
+        
+        if form.is_valid():
+            contact = form.save()
+            return redirect('contact:update', contact_id=contact.pk)
+        
+        return render(request, 'contact/create.html', context)   
+    
+    context = {'form': ContactForm(instance=contact), 'from_action': from_action}
+    
+    return render(request, 'contact/create.html', context)
