@@ -2,7 +2,7 @@ from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Contact
 from django.core.paginator import Paginator
-from .forms import ContactForm
+from .forms import ContactForm, RegisterForm
 from django.urls import reverse
 def index(request):
     contacts = Contact.objects.filter(show=True).order_by('-id')
@@ -43,7 +43,7 @@ def create(request):
     from_action = reverse('contact:create')
     
     if request.method == 'POST':
-        form = ContactForm(request.POST)
+        form = ContactForm(request.POST, request.FILES)
         context = {'form': form, 'from_action': from_action}
         
         if form.is_valid():
@@ -61,7 +61,7 @@ def update(request, contact_id):
     from_action = reverse('contact:update', args=(contact_id,))
     
     if request.method == 'POST':
-        form = ContactForm(request.POST, instance=contact)
+        form = ContactForm(request.POST, request.FILES, instance=contact)
         context = {'form': form, 'from_action': from_action}
         
         if form.is_valid():
@@ -86,3 +86,15 @@ def delete(request, contact_id):
         return redirect('contact:index')
     
     return render(request, 'contact/contact.html', {'contact': contact, 'confirmation': confirmation })
+
+
+def register(request):
+    form = RegisterForm
+    
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        
+        if form.is_valid():
+            form.save()
+            
+    return render(request, 'contact/register.html', {'form': form })
