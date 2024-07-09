@@ -41,6 +41,7 @@ def search(request):
 
 def create(request):
     from_action = reverse('contact:create')
+    
     if request.method == 'POST':
         form = ContactForm(request.POST)
         context = {'form': form, 'from_action': from_action}
@@ -72,3 +73,16 @@ def update(request, contact_id):
     context = {'form': ContactForm(instance=contact), 'from_action': from_action}
     
     return render(request, 'contact/create.html', context)
+
+
+
+def delete(request, contact_id):
+    contact = get_object_or_404(Contact, pk=contact_id, show=True)
+    
+    confirmation = request.POST.get('confirmation', 'no')
+    
+    if confirmation == 'yes':
+        contact.delete()
+        return redirect('contact:index')
+    
+    return render(request, 'contact/contact.html', {'contact': contact, 'confirmation': confirmation })
