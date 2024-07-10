@@ -4,6 +4,13 @@ from .models import Contact
 from django.core.paginator import Paginator
 from .forms import ContactForm, RegisterForm
 from django.urls import reverse
+from django.contrib import messages
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib import auth
+
+
+
+
 def index(request):
     contacts = Contact.objects.filter(show=True).order_by('-id')
     
@@ -56,6 +63,8 @@ def create(request):
     
     return render(request, 'contact/create.html', context)
    
+   
+   
 def update(request, contact_id):
     contact = get_object_or_404(Contact, pk=contact_id, show=True)
     from_action = reverse('contact:update', args=(contact_id,))
@@ -89,12 +98,38 @@ def delete(request, contact_id):
 
 
 def register(request):
-    form = RegisterForm
+    form = RegisterForm()
+    
+    
     
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         
         if form.is_valid():
             form.save()
+            messages.success(request, 'Usúario registrado')
+            return redirect('contact:index')
             
     return render(request, 'contact/register.html', {'form': form })
+
+
+def login_view(request):
+    
+    form = AuthenticationForm(request)
+    
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        
+        if form.is_valid():
+            user = form.get_user()
+            auth.login(request, user)
+            messages.success(request,'Logado com sucesso')
+            return redirect ('contact:index')
+        else:
+            messages.error(request, 'Usúario ou senha inválido')
+    
+    return render(request, 'contact/login.html', {'form': form })
+
+def logout_view(request):
+    auth.logout(request)
+    return redirect('contact:login')
