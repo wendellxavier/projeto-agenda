@@ -2,7 +2,7 @@ from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Contact
 from django.core.paginator import Paginator
-from .forms import ContactForm, RegisterForm
+from .forms import ContactForm, RegisterForm, RegisterUpdateForm
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
@@ -55,6 +55,7 @@ def create(request):
         
         if form.is_valid():
             contact = form.save()
+            messages.success(request, 'Criado com sucesso')
             return redirect('contact:update', contact_id=contact.pk)
         
         return render(request, 'contact/create.html', context)   
@@ -130,6 +131,28 @@ def login_view(request):
     
     return render(request, 'contact/login.html', {'form': form })
 
+
+
+def user_update(request):
+    form = RegisterUpdateForm(instance=request.user)
+    
+    if request.method != 'POST':
+        return render(request, 'contact/user-update.html', {'form': form})
+    
+    form = RegisterUpdateForm(data=request.POST, instance=request.user)
+    
+    if not form.is_valid():
+        messages.error(request, 'Erro na alteração')
+        return render(request, 'contact/user-update.html', {'form': form})
+    
+    form.save()
+    messages.success(request, 'Alteração feita com sucesso')
+    return redirect('contact:user_update')
+
+
+
 def logout_view(request):
     auth.logout(request)
     return redirect('contact:login')
+
+
